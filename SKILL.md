@@ -1,15 +1,15 @@
 ---
 name: english-code-playground
-description: A minimal, chat-native English-to-Python playground. Turn one short English idea into runnable Python, a concise execution result, and five levels of indented English pseudocode. Use when the user says "Playground:" or asks to launch the English Code Playground.
+description: A minimal, chat-native English-to-Python playground. Turn one short English idea into runnable Python, a concise execution result, and five levels of line-aligned English pseudocode. Use when the user says "Playground:" or asks to launch the English Code Playground.
 ---
 
-# English → Python Playground (MVP v0.2)
+# English → Python Playground (MVP v0.3)
 
 ## Purpose
 
 Turn an ordinary-English idea into an immediately explorable Python experiment **inside the user's existing chatbot**. This is an open playground, not a lesson plan. The user should never need to install software, clone a repository, obtain an API key, or configure a server. Use tools and native interface controls **already available** to the host. Don't promise capabilities the host does not support.
 
-**Experience we are protecting:** small, quiet, and fast. The assistant does the heavy lifting. The user submits a short idea, sees code and a one-line result, slides between five English explanations, and edits the original idea to try again.
+**Experience we are protecting:** small, quiet, and fast. The assistant does the heavy lifting. The user submits a short idea, sees Python and English side by side with corresponding lines aligned, a one-line result, and slides between five English explanations, and edits the original idea to try again.
 
 ## Interaction contract
 
@@ -20,6 +20,8 @@ Show **one small English input control**, with a few selectable starter ideas if
 - `If a car is above the speed limit, issue a ticket.`
 - `Every person has a name and an age.`
 
+**The launch response consists only of the input interface.** No introductory or trailing prose, separate list of the five levels, setup reassurance, repository link or usage summary. The interface itself is the explanation; omit even redundant captions. For a text-only host, use one concise input invitation.
+
 Submission should send a **short user message**, `Playground: <user idea>`. Do not send the entire skill instruction text or a giant generated prompt in the message. If the host only supports text, invite the user to send `Playground: ...`.
 
 ### On `Playground: <idea>` (or an unambiguous new idea)
@@ -28,45 +30,68 @@ Submission should send a **short user message**, `Playground: <user idea>`. Do n
 2. Translate it into **minimal readable Python**. Prefer a runnable deterministic illustration. Do not add elaborate classes or scaffolding when a simple `if` will do.
 3. If a real Python execution tool is available **and the code is safe to run**, actually run the exact displayed program and use the actual stdout/error. Real execution must be grounded in a real tool result, **never a prediction**. If a temporary test harness is needed, it must not alter the displayed program's behavior. Avoid external side effects, network calls, secrets, destructive operations, or executing untrusted code without suitable constraints.
 4. If real execution is unavailable, give a compact prediction clearly marked **Simulated — not executed**. Don't invent tool success, environment information, or verification.
-5. Based on the **actual displayed Python**, prepare **five separate English interpretations** before rendering the interface. Each interpretation must be accurate about what the program does, rather than just paraphrasing user intent. Keep control flow, conditions, loops, and nesting visible as indentation wherever possible.
+5. Based on the **actual displayed Python**, prepare **five separate arrays of English lines** before rendering the interface, one per abstraction level. Split the exact Python into physical source lines, including empty lines. Each array must contain exactly the same number of entries as Python has source lines, in the same order. Each English entry describes its corresponding Python line only, begins at the same indentation depth (copy its leading whitespace), and is empty when its Python line is empty. Each interpretation must faithfully describe the corresponding program operation. Do not merge multiple statements or redistribute explanations across rows.
 6. Render the compact result interface specified below. Add one brief assumptions note *only if* translation required a substantive interpretation.
 
 Do not require a second user action to execute the initial experiment. **Generating and running occur in one submission**. If runtime isn't available, the same flow uses a clearly labeled simulation.
 
 ## Result layout: freeze this UI
 
-Keep the result in this order, with minimal chrome and no redundant explanations:
+Render a single compact result interface, without any surrounding narration. Keep this order:
 
-1. **Python:** a syntax-highlighted, copyable code block containing the entire example. This is a *display*, not an editor in MVP v0.2.
-2. **Result:** a compact one-line stdout/value/error from that code. Mark it **Executed** only after real execution; otherwise **Simulated — not executed**. Longer output may be collapsible or truncated with an honest indicator. Show a small visualization *only when the program materially benefits from one*; no mandatory diagrams.
-3. **English interpretation:** a locally responsive **five-step abstraction slider**, Natural → Precise → Logical → Technical → Literal. The host should switch between five **pre-generated** interpretation strings using local UI state, **not** send a fresh request to the model when the slider moves.
-4. **Try again:** a small editable text field prefilled with the user's original English, followed by a **Try again** button. It submits only `Playground: <edited text>` as a new conversation turn. The preceding result doesn't have to update in place; the **next** assistant response renders a new, complete result.
+1. **Abstraction slider:** a locally responsive five-step slider, Natural → Precise → Logical → Technical → Literal. Show only the current level and the slider, with short endpoint labels if useful. Use five pre-generated line arrays and local UI state; never send a fresh model request when the slider moves.
+2. **Side-by-side comparison:** one shared two-column layout headed **Python** and **English**. Create one synchronized row per physical Python source line, including blank lines. Place the original code line on the left and its corresponding English entry at the current slider level on the right. These are two views of the same program, not independently flowing text panels. Use a shared row layout (a table or grid with shared row sizing), top-aligned cells, and a consistent monospaced font, line height, and whitespace-preserving rendering for both sides. Preserve actual indentation spaces and line breaks using preformatted rendering; ordinary paragraph rendering collapses whitespace and is unacceptable. Python remains fixed when the slider changes. Only the English column changes. Syntax highlighting and a copy affordance are welcome if they do not break row alignment.
+3. **Result:** compact stdout/value/error below the comparison. Mark **Executed** only after real execution, otherwise **Simulated — not executed**. Longer output may be truncated with an honest indicator. Add a small visualization only if it materially helps.
+4. **Try again:** a small editable text field prefilled with the user's exact English, followed by a **Try again** button. Submit only `Playground: <edited text>` as a new turn. The next response renders a fresh complete result.
 
-**Do not** add separate callout cards for variables, flow diagrams, assumptions, status pills, extra buttons, an editor for Python, a history browser, or a curriculum. No repeated copy of the user's input above the results. Optimize for mobile as well as desktop.
+### Alignment is a functional requirement
 
-If native widgets are unavailable, use a compact Markdown representation with one default indented English interpretation and offer other abstraction levels on request. Never display dead, non-functional controls or claim interactivity that isn't there.
+- Use shared rows, not two independent code blocks, text paragraphs, or independently wrapping panels. If either cell wraps, both cells occupy the same row height so the next pair starts at the same vertical position.
+- Preserve blank rows on both sides. Match each English line's leading spaces to its corresponding Python line, even at the Natural level. Keep descriptions short enough to reduce wrapping.
+- For continuation lines, provide a short corresponding fragment or leave the English cell empty when there is nothing useful to say; never move the explanation to another row. Prefer generated Python with simple physical lines to begin with.
+- On narrow screens, prefer a horizontally scrollable shared comparison to stacking the two columns. If scrolling is unsupported, use a compact two-column table with shared wrapping rows. Keep the line-by-line relationship intact.
+- Before rendering, check that each level has the same row count as Python, that blank rows match, and that indentation matches. Changing the slider must not shift the logical correspondence.
+
+**Do not** add separate cards for variables, flow diagrams, assumptions, status pills, extra buttons, a Python editor, a history browser, or a curriculum. Do not repeat the user input above the results. Show substantive assumptions in one short note when necessary. Do not print a separate list of abstraction levels or setup requirements.
+
+If native widgets are unavailable, use a two-column Markdown table with one row per source line and whitespace-preserving code spans or preformatted cells as supported. Offer other levels on request. Never display non-functional controls or claim interactivity that is not there.
 
 ## The five explanation levels
 
-Create all five **from the Python** and store them as static local values before displaying the slider. Preserve line breaks, code-like indentation, and blank lines in the UI; use monospaced/preformatted presentation when needed to prevent whitespace from collapsing.
+Create all five **from the Python**, as arrays of aligned lines, before displaying the slider. Every level uses the same row structure; only the vocabulary and detail change. Never convert a level into a prose paragraph, even at Natural or Literal.
 
-- **0 — Natural:** Human-friendly wording, still reflecting significant control flow.
-- **1 — Precise:** Plain English with explicit state and condition.
-- **2 — Logical:** Indented pseudocode with sequential operations and blocks.
+- **0 — Natural:** Everyday words that describe each line's operation.
+- **1 — Precise:** Plain English with explicit state and conditions.
+- **2 — Logical:** Pseudocode with named operations and blocks.
 - **3 — Technical:** Variables, comparisons, lists, and function operations named.
-- **4 — Literal:** Closest faithful explanation of Python evaluation, operations, calls, and side effects.
+- **4 — Literal:** Faithful Python mechanics, evaluation, calls, and side effects.
 
-Example skeleton (actual sentences should reflect the generated code):
+Example of the required row alignment at the Natural level (illustrative only; render as a shared two-column interface, not as prose):
 
 ```text
-The cat's ears are yellow.
-The brushed parts start empty.
+Python                              English
+ear_color = "yellow"                The cat's ears are yellow.
+brushed_parts = []                  Start with no brushed parts.
 
-If the ear color is yellow:
-    Add the ears to the brushed parts.
+if ear_color == "yellow":           If the ears are yellow:
+    brushed_parts.append("ears")        Record the ears as brushed.
 
-Show which parts were brushed.
+print(brushed_parts)                Show the brushed parts.
 ```
+
+At the Literal level, the same rows might read:
+
+```text
+Assign the string "yellow" to ear_color.
+Bind brushed_parts to a new empty list.
+
+If ear_color == "yellow" evaluates to True:
+    Call append("ears") on brushed_parts.
+
+Call print() with brushed_parts.
+```
+
+All five levels must use the same number of entries and the same indentation pattern. This example has seven rows including two empty rows.
 
 Important: the natural explanation must not claim physical brushing if the Python only `print`s a recommendation or records a string. A hypothetical `if` block must not be reported as always occurring. Preserve the relationship between a variable's initial value and the condition, and label substantive illustrative assumptions briefly.
 
