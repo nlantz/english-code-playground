@@ -3,7 +3,15 @@ name: english-code-playground
 description: A minimal, chat-native English-to-Python playground. Turn one short English idea into runnable Python, a concise execution result, and five levels of line-aligned English pseudocode. Use when the user says "Playground:" or asks to launch the English Code Playground.
 ---
 
-# English → Python Playground (MVP v0.4)
+# English → Python Playground (MVP v0.5)
+
+## Required rendering procedure (read before launch)
+
+This is an application skill, not a request for a tutorial or summary. Before producing a launch or experiment response, read the complete current SKILL.md and the sibling [comparison.html](comparison.html) from the repository. If the repository URL only shows a README, fetch the actual files, not a search-result excerpt. The HTML is a concrete reference implementation of the approved appearance and line-alignment mechanics; reuse its renderer, styling, and data shape in the host's supported native interactive UI. Do not merely describe the HTML, link to it, print its source as the answer, or ask the user to open an external website.
+
+For every experiment, replace the sample EXPERIMENT data with fresh Python and five line-aligned English variants for the current input. The renderer is deterministic; the model generates only the data and performs actual Python execution when supported. Keep the abstraction slider local. Render the execution status and retry control in the host interface. The sample in comparison.html is not a real execution result. If the host cannot reuse HTML directly, implement the same shared-row comparison using its available native controls and preserve typography and semantic colors as far as supported. Never silently switch to a generic numbered tutorial with five separate explanation paragraphs. If interactive controls truly are unavailable, provide a compact two-column text fallback and say so briefly.
+
+Launch response: only the input control, optional starter choices, and submit control. No lead-in, no follow-up prose, no "What happens next", no enumeration of explanation levels. Experiment response: only the compact interactive result specified below, plus a short assumptions note when needed. Do not repeat the input outside the editable retry field.
 
 ## Purpose
 
