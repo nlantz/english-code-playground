@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground comparison — reference renderer</title>
+<!--
+REFERENCE RENDERER ONLY. The chatbot supplies fresh EXPERIMENT data each turn.
+Use the host's native interactive rendering capability. Adapt the local slider
+to host-native controls if required. The execution result and editable retry
+field are rendered by the host outside this comparison. No remote API calls.
+The sample below is illustrative, not an execution claim.
+-->
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 16px system-ui, sans-serif; }
+  .playground { padding: 4px; }
+  .toolbar { display:flex; justify-content:space-between; align-items:center; margin:0 0 8px; }
+  #level { display:block; width:100%; margin:0 0 16px; accent-color:light-dark(#555,#bbb); }
+  .viewport { overflow-x:auto; padding-bottom:4px; }
+  .pair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 12px; min-width:680px; font:17px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace; }
+  .cell { background:light-dark(#f7f7f7,#202020); border-inline:1px solid light-dark(#ddd,#444); padding:0 12px; white-space:pre-wrap; overflow-wrap:anywhere; min-height:1.65em; }
+  .head { border-top:1px solid light-dark(#ddd,#444); border-radius:10px 10px 0 0; padding:12px; font:600 15px system-ui; }
+  .end { border-bottom:1px solid light-dark(#ddd,#444); border-radius:0 0 10px 10px; padding-bottom:14px; }
+  .control { color:light-dark(#813db1,#cc9afa); }
+  .state { color:light-dark(#1763b1,#84baff); }
+  .value { color:light-dark(#237b48,#87d5a1); }
+  .action { color:light-dark(#a55c10,#f0b36b); }
+</style>
+<section class="playground">
+  <div class="toolbar"><label for="level"><strong>Abstraction</strong></label><output id="levelName" for="level">Natural</output></div>
+  <input id="level" type="range" min="0" max="4" step="1" value="0">
+  <div class="viewport"><div class="pair" id="comparison"></div></div>
+</section>
+<script>
+  // Each line is an array of [text, role] spans. Join the text, including spaces,
+  // to recover the exact source line. Plain spans have role "plain".
+  // Replace this whole data object for every new user idea.
+  const EXPERIMENT = {
+    python: [
+      [["speed","state"],[" = ","plain"],["75","value"]],
+      [["speed_limit","state"],[" = ","plain"],["60","value"]],
+      [],
+      [["if","control"],[" ","plain"],["speed","state"],[" > ","plain"],["speed_limit","state"],[":","plain"]],
+      [["    ","plain"],["print","action"],["(","plain"],["\"Issue a ticket\"","value"],[")","plain"]]
+    ],
+    english: [
+      [
+        [["The car's speed","state"],[" is ","plain"],["75","value"],[" mph.","plain"]],
+        [["The speed limit","state"],[" is ","plain"],["60","value"],[" mph.","plain"]],
+        [],
+        [["If","control"],[" the ","plain"],["car's speed","state"],[" exceeds the ","plain"],["limit","state"],[":","plain"]],
+        [["    ","plain"],["Show","action"],[" the instruction ","plain"],["Issue a ticket","value"],[".","plain"]]
+      ],
+      [
+        [["Set ","plain"],["car speed","state"],[" to ","plain"],["75","value"],[" mph.","plain"]],
+        [["Set the ","plain"],["speed limit","state"],[" to ","plain"],["60","value"],[" mph.","plain"]],
+        [],
+        [["If","control"],[" ","plain"],["car speed","state"],[" is greater than the ","plain"],["speed limit","state"],[":","plain"]],
+        [["    ","plain"],["Display","action"],[" ","plain"],["\"Issue a ticket\"","value"],[".","plain"]]
+      ],
+      [
+        [["Set ","plain"],["speed","state"],[" to ","plain"],["75","value"],[".","plain"]],
+        [["Set ","plain"],["speed limit","state"],[" to ","plain"],["60","value"],[".","plain"]],
+        [],
+        [["If","control"],[" ","plain"],["speed","state"],[" > ","plain"],["speed limit","state"],[":","plain"]],
+        [["    ","plain"],["Output","action"],[" ","plain"],["\"Issue a ticket\"","value"],[".","plain"]]
+      ],
+      [
+        [["Assign ","plain"],["75","value"],[" to ","plain"],["speed","state"],[".","plain"]],
+        [["Assign ","plain"],["60","value"],[" to ","plain"],["speed_limit","state"],[".","plain"]],
+        [],
+        [["If","control"],[" ","plain"],["speed","state"],[" is greater than ","plain"],["speed_limit","state"],[":","plain"]],
+        [["    ","plain"],["Print","action"],[" the string ","plain"],["\"Issue a ticket\"","value"],[".","plain"]]
+      ],
+      [
+        [["Bind ","plain"],["speed","state"],[" to integer ","plain"],["75","value"],[".","plain"]],
+        [["Bind ","plain"],["speed_limit","state"],[" to integer ","plain"],["60","value"],[".","plain"]],
+        [],
+        [["If","control"],[" ","plain"],["speed","state"],[" > ","plain"],["speed_limit","state"],[" evaluates to True:","plain"]],
+        [["    ","plain"],["Call ","plain"],["print","action"],[" with ","plain"],["\"Issue a ticket\"","value"],[".","plain"]]
+      ]
+    ]
+  };
+  const names=["Natural","Precise","Logical","Technical","Literal"];
+  const roles=new Set(["control","state","value","action","plain"]);
+  const join=line=>line.map(s=>s[0]).join("");
+  const indent=line=>join(line).match(/^ */)[0];
+  function validate(data) {
+    if(data.english.length!==5) throw Error("Expected five abstraction levels");
+    for(const level of data.english){
+      if(level.length!==data.python.length) throw Error("Row count mismatch");
+      level.forEach((line,i)=>{
+        const source=data.python[i];
+        if(indent(line)!==indent(source)) throw Error("Indent mismatch at row "+i);
+        if(!join(source).trim() && join(line).trim()) throw Error("Blank row mismatch at "+i);
+      });
+    }
+    for(const line of [...data.python,...data.english.flat()]){
+      for(const [text,role] of line){
+        if(typeof text!=="string" || /[\r\n]/.test(text) || !roles.has(role)) throw Error("Invalid span");
+      }
+    }
+  }
+  function cell(line,extra=""){
+    const div=document.createElement("div");
+    div.className="cell "+extra;
+    for(const [text,role] of line){
+      const span=document.createElement("span");
+      if(role!=="plain") span.className=role;
+      span.textContent=text;
+      div.append(span);
+    }
+    return div;
+  }
+  function render(level){
+    document.getElementById("levelName").textContent=names[level];
+    const target=document.getElementById("comparison");
+    target.replaceChildren(cell([["Python","plain"]],"head"),cell([["English","plain"]],"head"));
+    EXPERIMENT.python.forEach((line,i)=>{
+      const extra=i===EXPERIMENT.python.length-1?"end":"";
+      target.append(cell(line,extra),cell(EXPERIMENT.english[level][i],extra));
+    });
+  }
+  validate(EXPERIMENT);
+  document.getElementById("level").addEventListener("input",e=>render(Number(e.target.value)));
+  render(0);
+</script>
+</html>
