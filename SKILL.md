@@ -3,7 +3,7 @@ name: english-code-playground
 description: A minimal, chat-native English-to-Python playground. Turn one short English idea into runnable Python, a concise execution result, and five levels of line-aligned English pseudocode. Use when the user says "Playground:" or asks to launch the English Code Playground.
 ---
 
-# English → Python Playground (MVP v0.3)
+# English → Python Playground (MVP v0.4)
 
 ## Purpose
 
@@ -40,9 +40,17 @@ Do not require a second user action to execute the initial experiment. **Generat
 Render a single compact result interface, without any surrounding narration. Keep this order:
 
 1. **Abstraction slider:** a locally responsive five-step slider, Natural → Precise → Logical → Technical → Literal. Show only the current level and the slider, with short endpoint labels if useful. Use five pre-generated line arrays and local UI state; never send a fresh model request when the slider moves.
-2. **Side-by-side comparison:** one shared two-column layout headed **Python** and **English**. Create one synchronized row per physical Python source line, including blank lines. Place the original code line on the left and its corresponding English entry at the current slider level on the right. These are two views of the same program, not independently flowing text panels. Use a shared row layout (a table or grid with shared row sizing), top-aligned cells, and a consistent monospaced font, line height, and whitespace-preserving rendering for both sides. Preserve actual indentation spaces and line breaks using preformatted rendering; ordinary paragraph rendering collapses whitespace and is unacceptable. Python remains fixed when the slider changes. Only the English column changes. Syntax highlighting and a copy affordance are welcome if they do not break row alignment.
+2. **Side-by-side comparison:** one shared two-column layout headed **Python** and **English**. Create one synchronized row per physical Python source line, including blank lines. Place the original code line on the left and its corresponding English entry at the current slider level on the right. These are two views of the same program, not independently flowing text panels. Use a shared row layout (a table or grid with shared row sizing), top-aligned cells, and a consistent monospaced font, line height, and whitespace-preserving rendering for both sides. Preserve actual indentation spaces and line breaks using preformatted rendering; ordinary paragraph rendering collapses whitespace and is unacceptable. Python remains fixed when the slider changes. Only the English column changes. Both columns must be visually distinct editor-style boxes with separate rounded borders, subtle backgrounds, equal top padding, and a small gutter between them. They must still share the same row geometry. Use readable monospace text at normal-to-large body size (target 17–18 px on desktop, at least 16 px where possible), not small captions. Apply syntax and semantic highlighting to both columns, as specified below. A copy affordance is optional.
 3. **Result:** compact stdout/value/error below the comparison. Mark **Executed** only after real execution, otherwise **Simulated — not executed**. Longer output may be truncated with an honest indicator. Add a small visualization only if it materially helps.
 4. **Try again:** a small editable text field prefilled with the user's exact English, followed by a **Try again** button. Submit only `Playground: <edited text>` as a new turn. The next response renders a fresh complete result.
+
+### Appearance and matching colors
+
+- Render two visibly separate, continuous panels labeled Python and English. Use quiet, neutral surfaces, rounded outlines, and generous but equal internal padding. Do not put each individual source line in its own card.
+- Use the same readable monospace font, size, and line spacing for both panels. Aim for 17–18 px body text and 1.5–1.6 line height. Use the host's regular or large text size when exact sizing is unavailable. Never shrink the text to squeeze both columns onto a narrow screen.
+- Color-code meaningful tokens in **both** panels using a shared, restrained semantic palette: purple for control flow (if, else, for, while and their English equivalents); blue for variables and named state; green for literal strings, numbers and corresponding English values; amber/orange for actions and function calls; neutral foreground for punctuation and connective prose. Adapt hues to light/dark themes and maintain readable contrast. In English, color only the corresponding words or phrases, not whole unrelated sentences. For example, Python `if` and English "If" share purple, `ear_color` and "ears" share blue, `"yellow"` and "yellow" share green, and `append` and "Record" share amber. Do not depend on color alone to communicate meaning.
+- Pre-generate semantic spans for each line of the Python and for each of the five English levels. Preserve every character and leading space when composing the spans. The Python text must remain exactly the code executed. Use inline colored spans or host-native equivalent, not screenshots or decorative colored badges. Do not use ordinary Markdown paragraph rendering that collapses indentation.
+- A practical layout is a two-column shared grid with one row per line pair and a continuous border/background behind each column (or a grid with shared row sizing/subgrid). Keep the two panels independent visually, but not in vertical layout. If the native host cannot draw continuous panel outlines with shared rows, use the closest supported two-panel appearance and retain shared row alignment over decorative borders. If custom coloring or type sizing is unsupported, use native syntax highlighting or readable preformatted text rather than faking the feature.
 
 ### Alignment is a functional requirement
 
@@ -54,7 +62,7 @@ Render a single compact result interface, without any surrounding narration. Kee
 
 **Do not** add separate cards for variables, flow diagrams, assumptions, status pills, extra buttons, a Python editor, a history browser, or a curriculum. Do not repeat the user input above the results. Show substantive assumptions in one short note when necessary. Do not print a separate list of abstraction levels or setup requirements.
 
-If native widgets are unavailable, use a two-column Markdown table with one row per source line and whitespace-preserving code spans or preformatted cells as supported. Offer other levels on request. Never display non-functional controls or claim interactivity that is not there.
+If native widgets are unavailable, use a two-column Markdown table with one row per source line and whitespace-preserving code spans or preformatted cells as supported. If custom color and panel styling are unavailable, do not promise them. Offer other levels on request. Never display non-functional controls or claim interactivity that is not there.
 
 ## The five explanation levels
 
