@@ -13,7 +13,7 @@ If it cannot read the URL, upload or paste [`SKILL.md`](SKILL.md) instead.
 ## What you get
 
 1. **Abstraction slider**, from natural English to literal Python explanation.
-2. **Side-by-side Python and English**, aligned line by line with matching indentation and blank lines.
+2. **Side-by-side Python and English**, in separate editor-style panels, with larger text, matching semantic colors, and line-by-line alignment.
 3. **One-line execution result**, actually executed if a safe Python tool is available; otherwise explicitly labeled a simulation.
 4. **Try again**, with your original English still editable.
 
@@ -29,4 +29,4 @@ Edit the retry field and try another sentence. Changing the abstraction slider s
 
 ## Status
 
-**MVP v0.3.** Chat-native, Python only. The Python is displayed, not edited inline. Each submission generates a fresh result in the conversation. Additional languages and code editing are intentionally out of scope.
+**MVP v0.4.** Chat-native, Python only. The Python is displayed, not edited inline. Each submission generates a fresh result in the conversation. Additional languages and code editing are intentionally out of scope.
