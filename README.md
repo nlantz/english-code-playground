@@ -6,9 +6,9 @@ A tiny AI-native coding playground that runs **inside your existing chatbot**. T
 
 Give your chatbot this repository URL and say:
 
-> Read `SKILL.md` in this repository and launch the English → Python Playground.
+> Read the full `SKILL.md` and `comparison.html` in this repository, then launch the English → Python Playground using your native interactive UI.
 
-If it cannot read the URL, upload or paste [`SKILL.md`](SKILL.md) instead.
+If it cannot read the URL, upload or paste [`SKILL.md`](SKILL.md) and [`comparison.html`](comparison.html) instead. The latter is the reference renderer, not a separate application the user needs to launch.
 
 ## What you get
 
@@ -29,4 +29,4 @@ Edit the retry field and try another sentence. Changing the abstraction slider s
 
 ## Status
 
-**MVP v0.4.** Chat-native, Python only. The Python is displayed, not edited inline. Each submission generates a fresh result in the conversation. Additional languages and code editing are intentionally out of scope.
+**MVP v0.5.** Chat-native, Python only. The Python is displayed, not edited inline. Each submission generates a fresh result in the conversation. Additional languages and code editing are intentionally out of scope.
